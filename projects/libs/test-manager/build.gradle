@@ -1,0 +1,9 @@
+apply plugin: 'java-library'
+
+group 'com.tencent.shadow.test.lib.test-manager'
+
+dependencies {
+    compileOnly "com.github.newzerohepler.shadow.dynamic:host:$shadow_version"
+}
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8

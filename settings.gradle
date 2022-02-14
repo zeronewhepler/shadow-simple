@@ -1,0 +1,45 @@
+import java.nio.file.Files
+
+rootProject.name = "ZeroNewHelper-Shadow"
+
+includeLibs()
+includeHostProject()
+includeManagerProject()
+includePluginProject()
+
+
+
+def includeHostProject(){
+    include ':host'
+
+    project(':host').projectDir = file('projects/host-project/host')
+}
+
+def includeLibs(){
+    include 'constant',
+        'custom-view',
+        'plugin-use-host-code-lib',
+        'test-manager'
+
+    project(':constant').projectDir = file('projects/libs/constant')
+    project(':custom-view').projectDir = file('projects/libs/custom-view')
+    project(':plugin-use-host-code-lib').projectDir = file('projects/libs/plugin-use-host-code-lib')
+    project(':test-manager').projectDir = file('projects/libs/test-manager')
+}
+
+def includeManagerProject(){
+    include ':manager'
+
+    project(':manager').projectDir = file('projects/manager-project/manager')
+}
+
+def includePluginProject(){
+    include ':loader',
+            ':runtime',
+            ':test-plugin'
+    project(':loader').projectDir = file('projects/plugin-project/loader')
+    project(':runtime').projectDir = file('projects/plugin-project/runtime')
+    project(':test-plugin').projectDir = file('projects/plugin-project/test-plugin')
+}
+
+

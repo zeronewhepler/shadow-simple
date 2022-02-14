@@ -1,0 +1,121 @@
+apply plugin: 'com.android.application'
+apply plugin: 'com.tencent.shadow.plugin'
+apply plugin: 'kotlin-android'
+
+android {
+    compileSdk project.COMPILE_SDK_VERSION
+
+    defaultConfig {
+        applicationId "com.hzl.test_plugin"
+        minSdk project.MIN_SDK_VERSION
+        targetSdk project.TARGET_SDK_VERSION
+        versionCode project.VERSION_CODE
+        versionName project.VERSION_NAME
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    // 强制转换插件 applicationId
+    productFlavors {
+        plugin {
+            applicationId project.HOST_APP_APPLICATION_ID
+        }
+    }
+}
+
+dependencies {
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+
+
+    //Shadow Transform后业务代码会有一部分实际引用runtime中的类
+    //如果不以compileOnly方式依赖，会导致其他Transform或者Proguard找不到这些类
+    pluginCompileOnly "com.github.newzerohepler.shadow.core:runtime:$shadow_version"
+
+    implementation "androidx.core:core-ktx:$x_core_version"
+    implementation "androidx.appcompat:appcompat:$x_appcompat_version"
+    implementation "com.google.android.material:material:$material_version"
+
+    testImplementation 'junit:junit:4.+'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+}
+
+shadow {
+    transform {
+//        useHostContext = ['abc']
+    }
+
+    packagePlugin {
+        archivePrefix = "test-plugin-loader-and-runtime"
+        pluginTypes {
+            debug {
+                loaderApkConfig = new Tuple2('loader-debug.apk', ':loader:assembleDebug')
+                runtimeApkConfig = new Tuple2('runtime-debug.apk', ':runtime:assembleDebug')
+                println loaderApkConfig
+                println runtimeApkConfig
+                pluginApks {
+                    pluginApk1 {
+                        partKey = 'test-plugin'
+                        buildTask = ':test-plugin:assemblePluginDebug'
+                        apkPath = 'projects/plugin-project/test-plugin/build/outputs/apk/plugin/debug/test-plugin-plugin-debug.apk'
+                        /*hostWhiteList = ["androidx.test.espresso",//这个包添加是为了general-cases插件中可以访问测试框架的类
+                                         "com.tencent.shadow.test.lib.plugin_use_host_code_lib.interfaces"]//测试插件访问宿主白名单类*/
+                    }
+                }
+            }
+
+        }
+
+        loaderApkProjectPath = 'projects/plugin-project/loader'
+
+        runtimeApkProjectPath = 'projects/plugin-project/runtime'
+
+        version = 4
+        compactVersion = [1]
+        uuidNickName = "1.1.5"
+    }
+}
+
+/*shadow {
+    transform {
+//        useHostContext = ['abc']
+    }
+
+    packagePlugin {
+        archivePrefix = "test-plugin-only"
+        pluginTypes {
+            debug {
+
+                pluginApks {
+                    pluginApk1 {
+                        partKey = 'test-plugin'
+                        buildTask = ':test-plugin:assemblePluginDebug'
+                        apkPath = 'projects/plugin-project/test-plugin/build/outputs/apk/plugin/debug/test-plugin-plugin-debug.apk'
+                        hostWhiteList = ["androidx.test.espresso",//这个包添加是为了general-cases插件中可以访问测试框架的类
+                                         "com.tencent.shadow.test.lib.plugin_use_host_code_lib.interfaces"]//测试插件访问宿主白名单类
+                    }
+                }
+            }
+
+        }
+
+
+        version = 4
+        compactVersion = [1]
+        uuidNickName = "1.1.5"
+    }
+}*/
